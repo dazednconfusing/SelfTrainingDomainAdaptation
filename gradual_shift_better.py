@@ -1,13 +1,15 @@
 
-import utils
-import models
-import datasets
+import pickle
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import metrics
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
-import pickle
+
+import datasets
+import models
+import utils
 
 
 def compile_model(model, loss='ce'):
@@ -246,29 +248,29 @@ def gaussian_linear_experiment_more_epochs():
 
 if __name__ == "__main__":
     # Main paper experiments.
-    portraits_conv_experiment()
-    print("Portraits conv experiment")
-    experiment_results('saved_files/portraits.dat')
+    # portraits_conv_experiment()
+    # print("Portraits conv experiment")
+    # experiment_results('saved_files/portraits.dat')
     rotated_mnist_60_conv_experiment()
     print("Rot MNIST conv experiment")
     experiment_results('saved_files/rot_mnist_60_conv.dat')
-    gaussian_linear_experiment()
-    print("Gaussian linear experiment")
-    experiment_results('saved_files/gaussian.dat')
-    print("Dialing MNIST ratios conv experiment")
-    dialing_ratios_mnist_experiment()
-    experiment_results('saved_files/dialing_rot_mnist_60_conv.dat')
+    # gaussian_linear_experiment()
+    # print("Gaussian linear experiment")
+    # experiment_results('saved_files/gaussian.dat')
+    # print("Dialing MNIST ratios conv experiment")
+    # dialing_ratios_mnist_experiment()
+    # experiment_results('saved_files/dialing_rot_mnist_60_conv.dat')
 
     # Without confidence thresholding.
-    portraits_conv_experiment_noconf()
-    print("Portraits conv experiment no confidence thresholding")
-    experiment_results('saved_files/portraits_noconf.dat')
-    rotated_mnist_60_conv_experiment_noconf()
-    print("Rot MNIST conv experiment no confidence thresholding")
-    experiment_results('saved_files/rot_mnist_60_conv_noconf.dat')
-    gaussian_linear_experiment_noconf()
-    print("Gaussian linear experiment no confidence thresholding")
-    experiment_results('saved_files/gaussian_noconf.dat')
+    # portraits_conv_experiment_noconf()
+    # print("Portraits conv experiment no confidence thresholding")
+    # experiment_results('saved_files/portraits_noconf.dat')
+    # rotated_mnist_60_conv_experiment_noconf()
+    # print("Rot MNIST conv experiment no confidence thresholding")
+    # experiment_results('saved_files/rot_mnist_60_conv_noconf.dat')
+    # gaussian_linear_experiment_noconf()
+    # print("Gaussian linear experiment no confidence thresholding")
+    # experiment_results('saved_files/gaussian_noconf.dat')
 
     # Try predicting for next set of data points on portraits.
     portraits_conv_experiment_more()
@@ -276,23 +278,23 @@ if __name__ == "__main__":
     experiment_results('saved_files/portraits_more.dat')
 
     # Try smaller window sizes.
-    portraits_conv_experiment_smaller_interval()
-    print("Portraits conv experiment smaller window")
-    experiment_results('saved_files/portraits_smaller_interval.dat')
-    rotated_mnist_60_conv_experiment_smaller_interval()
-    print("Rot MNIST conv experiment smaller window")
-    experiment_results('saved_files/rot_mnist_60_conv_smaller_interval.dat')
-    gaussian_linear_experiment_smaller_interval()
-    print("Gaussian linear experiment smaller window")
-    experiment_results('saved_files/gaussian_smaller_interval.dat')
+    # portraits_conv_experiment_smaller_interval()
+    # print("Portraits conv experiment smaller window")
+    # experiment_results('saved_files/portraits_smaller_interval.dat')
+    # rotated_mnist_60_conv_experiment_smaller_interval()
+    # print("Rot MNIST conv experiment smaller window")
+    # experiment_results('saved_files/rot_mnist_60_conv_smaller_interval.dat')
+    # gaussian_linear_experiment_smaller_interval()
+    # print("Gaussian linear experiment smaller window")
+    # experiment_results('saved_files/gaussian_smaller_interval.dat')
 
     # Try training more epochs.
-    portraits_conv_experiment_more_epochs()
-    print("Portraits conv experiment train longer")
-    experiment_results('saved_files/portraits_more_epochs.dat')
-    rotated_mnist_60_conv_experiment_more_epochs()
-    print("Rot MNIST conv experiment train longer")
-    experiment_results('saved_files/rot_mnist_60_conv_more_epochs.dat')
-    gaussian_linear_experiment_more_epochs()
-    print("Gaussian linear experiment train longer")
-    experiment_results('saved_files/gaussian_more_epochs.dat')
+    # portraits_conv_experiment_more_epochs()
+    # print("Portraits conv experiment train longer")
+    # experiment_results('saved_files/portraits_more_epochs.dat')
+    # rotated_mnist_60_conv_experiment_more_epochs()
+    # print("Rot MNIST conv experiment train longer")
+    # experiment_results('saved_files/rot_mnist_60_conv_more_epochs.dat')
+    # gaussian_linear_experiment_more_epochs()
+    # print("Gaussian linear experiment train longer")
+    # experiment_results('saved_files/gaussian_more_epochs.dat')
