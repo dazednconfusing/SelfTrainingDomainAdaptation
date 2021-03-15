@@ -82,7 +82,14 @@ def classifier(num_labels, latent_dim):
 
 class VAE(keras.Model):
     def __init__(
-        self, num_labels, input_shape=(28, 28, 1), latent_dim=20, cw=20, rw=10, **kwargs
+        self,
+        num_labels,
+        input_shape=(28, 28, 1),
+        latent_dim=20,
+        cw=2,
+        rw=1,
+        kw=0.01,
+        **kwargs
     ):
         super(VAE, self).__init__(**kwargs)
         self.encoder = encoder(latent_dim, input_shape)
@@ -99,6 +106,7 @@ class VAE(keras.Model):
 
         self.classifier_weight = cw
         self.recon_weight = rw
+        self.kl_weight = kw
 
     @property
     def metrics(self):
@@ -128,7 +136,7 @@ class VAE(keras.Model):
             )
             total_loss = (
                 self.recon_weight * reconstruction_loss
-                + kl_loss
+                + self.kl_weight * kl_loss
                 + self.classifier_weight * classifier_loss
             )
 
@@ -167,7 +175,7 @@ class VAE(keras.Model):
         )
         total_loss = (
             self.recon_weight * reconstruction_loss
-            + kl_loss
+            + self.kl_weight * kl_loss
             + self.classifier_weight * classifier_loss
         )
         self.total_loss_tracker.update_state(total_loss)
