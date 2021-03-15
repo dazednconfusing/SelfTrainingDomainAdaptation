@@ -85,10 +85,11 @@ class VAE(keras.Model):
         self,
         num_labels,
         input_shape=(28, 28, 1),
-        latent_dim=20,
-        cw=2,
+        latent_dim=6,
+        cw=10,
         rw=1,
-        kw=0.01,
+        kw=1,
+        deterministic=False,
         **kwargs
     ):
         super(VAE, self).__init__(**kwargs)
@@ -107,6 +108,7 @@ class VAE(keras.Model):
         self.classifier_weight = cw
         self.recon_weight = rw
         self.kl_weight = kw
+        self.deterministic = deterministic
 
     @property
     def metrics(self):
@@ -122,15 +124,19 @@ class VAE(keras.Model):
         x_, y = data
         with tf.GradientTape() as tape:
             z_mean, z_log_var, z = self.encoder(x_)
-            reconstruction = self.decoder(z)
+            if self.deterministic:
+                reconstruction = self.decoder(z_mean)
+                outputs = self.classifier(z_mean)
+            else:
+                reconstruction = self.decoder(z)
+                outputs = self.classifier(z)
             reconstruction_loss = tf.reduce_mean(
                 tf.reduce_sum(
                     keras.losses.binary_crossentropy(x_, reconstruction), axis=(1, 2)
                 )
             )
-            outputs = self.classifier(z)
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1))
+            kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1)) / self.latent_dim
             classifier_loss = tf.reduce_mean(
                 keras.losses.sparse_categorical_crossentropy(y, outputs)
             )
@@ -158,31 +164,33 @@ class VAE(keras.Model):
     def test_step(self, data):
         x_, y = data
         z_mean, z_log_var, z = self.encoder(x_)
-        reconstruction = self.decoder(z)
-        reconstruction_loss = (
-            tf.reduce_mean(
-                tf.reduce_sum(
-                    keras.losses.binary_crossentropy(x_, reconstruction), axis=(1, 2)
-                )
+        if self.deterministic:
+            reconstruction = self.decoder(z_mean)
+            outputs = self.classifier(z_mean)
+        else:
+            reconstruction = self.decoder(z)
+            outputs = self.classifier(z)
+        reconstruction_loss = tf.reduce_mean(
+            tf.reduce_sum(
+                keras.losses.binary_crossentropy(x_, reconstruction), axis=(1, 2)
             )
-            / 784
         )
-        outputs = self.classifier(z)
+        print("recon loss: ", reconstruction_loss)
         kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
         kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1)) / self.latent_dim
         classifier_loss = tf.reduce_mean(
             keras.losses.sparse_categorical_crossentropy(y, outputs)
         )
+        self.accuracy_tracker.update_state(y, outputs)
+        self.reconstruction_loss_tracker.update_state(reconstruction_loss)
+        self.kl_loss_tracker.update_state(kl_loss)
+        self.classifier_loss_tracker.update_state(classifier_loss)
         total_loss = (
             self.recon_weight * reconstruction_loss
             + self.kl_weight * kl_loss
             + self.classifier_weight * classifier_loss
         )
         self.total_loss_tracker.update_state(total_loss)
-        self.accuracy_tracker.update_state(y, outputs)
-        self.reconstruction_loss_tracker.update_state(reconstruction_loss)
-        self.kl_loss_tracker.update_state(kl_loss)
-        self.classifier_loss_tracker.update_state(classifier_loss)
         return {
             "loss": self.total_loss_tracker.result(),
             "reconstruction_loss": self.reconstruction_loss_tracker.result(),
@@ -193,7 +201,7 @@ class VAE(keras.Model):
 
     def call(self, x):
         z_mean, z_log_var, z = self.encoder(x)
-        outputs = self.classifier(z)
+        outputs = self.classifier(z_mean)
         return outputs
 
 

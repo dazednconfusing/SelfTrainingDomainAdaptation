@@ -10,5 +10,4 @@ code folder (current folder, where the README is). Then run "python create_datas
 - For the final camera-ready code, we will include virtualenv instructions, and a more automated process for processing the dataset.
 
 Main files
-- gradual_shift_better.py contains scripts for experiments in Section 5.1 and 5.3.
-- regularization_helps.py contains scripts for experiments in Section 5.2.
+- gradual_shift_better.py contains reproduction and ablation scripts for experiments in Section 5.1 

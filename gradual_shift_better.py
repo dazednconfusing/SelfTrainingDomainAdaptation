@@ -72,8 +72,12 @@ def run_experiment(
 
     # print("\n\n\n NUM REPEATS", num_repeats)
 
-    def new_model():
+    def new_model(source=False):
         model = model_func(n_classes, input_shape=input_shape)
+        if not source and loss is None:
+            model.classifier_weight = 0
+            model.recon_weight = 1
+            model.kl_weight = 1
         compile_model(model, loss)
         return model
 
@@ -85,11 +89,12 @@ def run_experiment(
         trg_eval_x = trg_val_x
         trg_eval_y = trg_val_y
         # Train source model.
-        source_model = new_model()
+        source_model = new_model(source=True)
         source_model.fit(src_tr_x, src_tr_y, epochs=30, verbose=False)
-        # print(
-        #     "\n\nevaluated source model:", source_model.evaluate(src_val_x, src_val_y)
-        # )
+        # print(history.history)
+        print(
+            "\n\nevaluated source model:", source_model.evaluate(src_val_x, src_val_y)
+        )
         src_acc = source_model.evaluate(src_val_x, src_val_y, return_dict=True)[
             "sparse_categorical_accuracy"
         ]
@@ -244,7 +249,7 @@ def rotated_mnist_60_vae_experiment():
         save_file="saved_files/rot_mnist_60_conv.dat",
         model_func=models.vae_model,
         interval=2000,
-        epochs=30,
+        epochs=10,
         loss=None,
         soft=False,
         conf_q=0.1,
