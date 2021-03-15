@@ -273,9 +273,9 @@ if __name__ == "__main__":
     # experiment_results('saved_files/gaussian_noconf.dat')
 
     # Try predicting for next set of data points on portraits.
-    portraits_conv_experiment_more()
-    print("Portraits next datapoints conv experiment")
-    experiment_results('saved_files/portraits_more.dat')
+#    portraits_conv_experiment_more()
+ #   print("Portraits next datapoints conv experiment")
+  #  experiment_results('saved_files/portraits_more.dat')
 
     # Try smaller window sizes.
     # portraits_conv_experiment_smaller_interval()
