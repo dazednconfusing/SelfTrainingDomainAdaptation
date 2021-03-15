@@ -1,7 +1,7 @@
-
 import numpy as np
-from tensorflow.keras.models import load_model
 import tensorflow as tf
+from tensorflow.keras.models import load_model
+
 
 def rand_seed(seed):
     np.random.seed(seed)
@@ -24,8 +24,17 @@ def soft_self_train_once(student, teacher, unsup_x, epochs=20):
     student.fit(unsup_x, probs, epochs=epochs, verbose=False)
 
 
-def self_train(student_func, teacher, unsup_x, confidence_q=0.1, epochs=20, repeats=1,
-               target_x=None, target_y=None, soft=False):
+def self_train(
+    student_func,
+    teacher,
+    unsup_x,
+    confidence_q=0.1,
+    epochs=20,
+    repeats=1,
+    target_x=None,
+    target_y=None,
+    soft=False,
+):
     accuracies = []
     for i in range(repeats):
         student = student_func(teacher)
@@ -34,27 +43,40 @@ def self_train(student_func, teacher, unsup_x, confidence_q=0.1, epochs=20, repe
         else:
             self_train_once(student, teacher, unsup_x, confidence_q, epochs)
         if target_x is not None and target_y is not None:
-            _, accuracy = student.evaluate(target_x, target_y, verbose=True)
+            accuracy = student.evaluate(
+                target_x, target_y, verbose=True, return_dict=True
+            )["sparse_categorical_accuracy"]
             accuracies.append(accuracy)
         teacher = student
     return accuracies, student
 
 
-def gradual_self_train(student_func, teacher, unsup_x, debug_y, interval, confidence_q=0.1,
-                       epochs=20, soft=False):
+def gradual_self_train(
+    student_func,
+    teacher,
+    unsup_x,
+    debug_y,
+    interval,
+    confidence_q=0.1,
+    epochs=20,
+    soft=False,
+):
     upper_idx = int(unsup_x.shape[0] / interval)
     accuracies = []
+    # print('\n\n upper idx: ', upper_idx)
     for i in range(upper_idx):
         student = student_func(teacher)
-        cur_xs = unsup_x[interval*i:interval*(i+1)]
-        cur_ys = debug_y[interval*i:interval*(i+1)]
+        cur_xs = unsup_x[interval * i : interval * (i + 1)]
+        cur_ys = debug_y[interval * i : interval * (i + 1)]
         # _, student = self_train(
         #     student_func, teacher, unsup_x, confidence_q, epochs, repeats=2)
         if soft:
             soft_self_train_once(student, teacher, cur_xs, epochs)
         else:
             self_train_once(student, teacher, cur_xs, confidence_q, epochs)
-        _, accuracy = student.evaluate(cur_xs, cur_ys)
+        accuracy = student.evaluate(cur_xs, cur_ys, return_dict=True)[
+            "sparse_categorical_accuracy"
+        ]
         accuracies.append(accuracy)
         teacher = student
     return accuracies, student
@@ -66,13 +88,19 @@ def split_data(xs, ys, splits):
 
 def train_to_acc(model, acc, train_x, train_y, val_x, val_y):
     # Modify steps per epoch to be around dataset size / 10
-    # Keep training until accuracy 
+    # Keep training until accuracy
     batch_size = 32
     data_size = train_x.shape[0]
     steps_per_epoch = int(data_size / 50.0 / batch_size)
     logger.info("train_xs size is %s", str(train_x.shape))
     while True:
-        model.fit(train_x, train_y, batch_size=batch_size, steps_per_epoch=steps_per_epoch, verbose=False)
+        model.fit(
+            train_x,
+            train_y,
+            batch_size=batch_size,
+            steps_per_epoch=steps_per_epoch,
+            verbose=False,
+        )
         val_accuracy = model.evaluate(val_x, val_y, verbose=False)[1]
         logger.info("validation accuracy is %f", val_accuracy)
         if val_accuracy >= acc:
@@ -96,7 +124,6 @@ def rolling_average(sequence, r):
     cur_sum = sum(sequence[:r])
     rolling_sums.append(cur_sum)
     for i in range(r, N):
-        cur_sum = cur_sum + sequence[i] - sequence[i-r]
+        cur_sum = cur_sum + sequence[i] - sequence[i - r]
         rolling_sums.append(cur_sum)
     return np.array(rolling_sums) * 1.0 / r
-
